@@ -1,23 +1,68 @@
-import './style.css'
-import javascriptLogo from './javascript.svg'
-import { setupCounter } from './counter.js'
+import * as THREE from "three";
+import "./style.css";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
-document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`
+// Scene
+const scene = new THREE.Scene();
 
-setupCounter(document.querySelector('#counter'))
+// Create object gltf assets
+const loader = new GLTFLoader();
+loader.load("/assets/GLOBE.glb", function (gltf) {
+  const model = gltf.scene;
+  scene.add(model);
+});
+
+// Sizes
+const sizes = {
+  width: window.innerWidth,
+  heigth: window.innerHeight,
+};
+
+// light
+const light = new THREE.PointLight(0xffffff, 5, 100);
+light.position.set(10, 10, 10);
+scene.add(light);
+
+// camera
+const camera = new THREE.PerspectiveCamera(
+  45,
+  sizes.width / sizes.heigth,
+  0.1,
+  50
+);
+camera.position.z = 20;
+scene.add(camera);
+
+// Render
+const canvas = document.querySelector(".webgl");
+const render = new THREE.WebGLRenderer({ canvas });
+
+render.setSize(sizes.width, sizes.heigth);
+render.render(scene, camera);
+
+// Controls
+const controls = new OrbitControls(camera, canvas);
+// controls.enableDamping = true;
+// controls.enableZoom = false;
+// controls.enablePan = false;
+
+// Resize
+window.addEventListener("resize", () => {
+  //   update size
+  sizes.width = window.width;
+  sizes.heigth = window.heigth;
+
+  // update camera
+  camera.aspect = sizes.width / sizes.heigth;
+  camera.updateProjectionMatrix();
+  render.setSize(sizes.width, sizes.heigth);
+});
+
+const loop = () => {
+  controls.update();
+  render.render(scene, camera);
+  window.requestAnimationFrame(loop);
+};
+
+loop();
