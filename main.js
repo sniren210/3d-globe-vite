@@ -8,7 +8,7 @@ const scene = new THREE.Scene();
 
 // Create object gltf assets
 const loader = new GLTFLoader();
-loader.load("/assets/GLOBE.glb", function (gltf) {
+loader.load("/public/GLOBE.glb", function (gltf) {
   const model = gltf.scene;
   scene.add(model);
 });
